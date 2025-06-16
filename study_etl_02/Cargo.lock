@@ -940,6 +940,7 @@ name = "study_etl_02"
 version = "0.1.0"
 dependencies = [
  "dotenv",
+ "once_cell",
  "reqwest",
  "serde",
  "serde_json",

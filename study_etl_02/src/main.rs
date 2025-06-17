@@ -57,8 +57,6 @@ fn get_ocid(
     let status: StatusCode = response.status();
     let status_code: &str = status.as_str();
     let body: String = response.text()?;
-    println!("Response Status: {}", status_code);
-    println!("Response Body: {}", body);
 
     // 응답 처리
     if status.is_success() {
@@ -73,13 +71,60 @@ fn get_ocid(
     }
 }
 
+// 캐릭터의 OCID를 통해 기본 정보 가져오기
+fn get_character_info(ocid: &str) -> Result<serde_json::Value, Box<dyn Error>> {
+    // 요청정보 검증 및 생성
+    if ocid.is_empty() {
+        return Err("OCID is empty".into());
+    }
+    let api_service_url: &str = "/maplestory/v1/character/basic";
+    let api_param: String = format!(
+        "{}{}?ocid={}",
+        NEXON_API_VARS.api_url_home.as_str(),
+        api_service_url,
+        ocid
+    );
+    
+    // request 생성
+    let mut headers: HeaderMap = HeaderMap::new();
+    headers.insert(
+        "x-nxopen-api-key",
+        NEXON_API_VARS.test.parse()?
+    );
+    let res_client: Client = Client::new();
+    let response: Response = res_client
+        .get(&api_param)
+        .headers(headers)
+        .send()?;
+    let status: StatusCode = response.status();
+    let status_code: &str = status.as_str();
+    let body: String = response.text()?;
+
+    // 응답 처리
+    if status.is_success() {
+        let json: serde_json::Value = serde_json::from_str(&body)?;
+        Ok(json)
+    } else {
+        Err(format!("[{}] Failed to get character info: {}", status_code, body).into())
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let req_character_name: &'static str = "마법사악";
 
     // OCID 가져오기
-    match get_ocid(req_character_name) {
-        Ok(ocid) => println!("OCID for {}: {}", req_character_name, ocid),
-        Err(e) => eprintln!("Error fetching OCID: {}", e),
+    let ocid = match get_ocid(req_character_name) {
+        Ok(ocid) => ocid,
+        Err(e) => {
+            eprintln!("Error fetching OCID: {}", e);
+            return Err(e);
+        }
+    };
+
+    // OCID를 통해 캐릭터 정보 가져오기
+    match get_character_info(ocid.as_str()) {
+        Ok(character_info) => println!("Character Info: {}", character_info),
+        Err(e) => eprintln!("Error fetching character info: {}", e),
     }
     Ok(())
 }

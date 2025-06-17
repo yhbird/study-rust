@@ -59,3 +59,20 @@ match some_result {
 }
 ```
 `?` 를 붙이면 에러가 발생할때 즉시 현재 함수를 탈출하고 에러를 반환한다.
+
+### 5. 함수 결과를 변수에 저장할 수 있도록 match안에서 변수처리
+```rust
+let ocid = match get_ocid(req_character_name) {
+        Ok(ocid) => ocid,
+        Err(e) => {
+            eprintln!("Error fetching OCID: {}", e);
+            return Err(e);
+        }
+    };
+
+// 위의 코드를 "?" 연산자를 통해 간단하게 에러 처리가 가능함
+let ocid = match get_ocid(req_character_name)?
+``` 
+
+`String`, `Vac` 같은 heap 데이터는 함수에 넘길 때 `&` 연산자를 붙여 참조로 넘겨야 한다.
+그렇지 않으면 move, copy 문제 발생

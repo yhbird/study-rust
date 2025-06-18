@@ -71,8 +71,12 @@ let ocid = match get_ocid(req_character_name) {
     };
 
 // 위의 코드를 "?" 연산자를 통해 간단하게 에러 처리가 가능함
-let ocid = match get_ocid(req_character_name)?
+let ocid = get_ocid(req_character_name)?
 ``` 
 
-`String`, `Vac` 같은 heap 데이터는 함수에 넘길 때 `&` 연산자를 붙여 참조로 넘겨야 한다.
+- `String`, `Vec` 같은 heap 데이터는 함수에 넘길 때 `&` 연산자를 붙여 참조로 넘겨야 한다.
 그렇지 않으면 move, copy 문제 발생
+
+- `match`의 역할은? 직접 패턴을 분기해서 `Ok(...)`, `Err(...)`를 직접 분기해서 다르게 처리할 때 사용함. 결과를 보고 수동으로 처리 흐름 제어
+
+- `?` 연산자와 `match`를 같이 사용하면 **컴파일 에러** 발생
